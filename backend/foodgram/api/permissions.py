@@ -9,11 +9,10 @@ class IsAdminOrReadOnly(BasePermission):
     """Полный доступ админ или только чтение."""
 
     def has_permission(self, request, view) -> bool:
-        return (
-                request.method in SAFE_METHODS
+        return (request.method in SAFE_METHODS
                 or request.user.is_authenticated
                 and request.user.is_admin
-        )
+                )
 
 
 class IsAdmin(BasePermission):

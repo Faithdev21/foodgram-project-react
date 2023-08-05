@@ -5,7 +5,7 @@ from recipes.models import Ingredient
 
 
 class Command(BaseCommand):
-    help = 'Import data from CSV file to ingredient table'
+    help = 'Импорт данных в таблицу Ингредиентов'
 
     def handle(self, *args, **kwargs):
         for row in csv.DictReader(

@@ -30,11 +30,13 @@ from .mixins import CreateList, ListRetrieve
 
 
 class CustomUserViewSet(UserViewSet):
+    """Вьюсет пользователя."""
     serializer_class = CustomUserSerializer
     http_method_names = ['get', 'post']
     permission_classes = (StaffAuthorOrReadOnly,)
 
-    def get_serializer_class(self):
+    def get_serializer_class(self) -> Type:
+        """Возвращает сериализатор."""
         if self.action == "set_password":
             return SetPasswordSerializer
         elif self.request.method == "POST":
@@ -44,12 +46,13 @@ class CustomUserViewSet(UserViewSet):
     @action(detail=False,
             methods=['GET'],
             permission_classes=(IsAuthenticated,))
-    def me(self, request):
+    def me(self, request: Request) -> Response:
         serializer = CustomUserSerializer(self.request.user)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class TagViewSet(ListRetrieve):
+    """Возвращает список тегов."""
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
     permission_classes = (IsAdminOrReadOnly,)
@@ -59,6 +62,7 @@ class TagViewSet(ListRetrieve):
 
 
 class IngredientViewSet(ListRetrieve):
+    """Возвращает список ингредиентов."""
     queryset = Ingredient.objects.all()
     serializer_class = IngredientReadSerializer
     permission_classes = (IsAdminOrReadOnly,)
@@ -70,6 +74,7 @@ class IngredientViewSet(ListRetrieve):
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
+    """Вьюсет для работы с рецептами."""
     queryset = Recipe.objects.all()
     serializer_class = RecipeReadSerializer
     filter_backends: Tuple = (DjangoFilterBackend, OrderingFilter,)

@@ -1,18 +1,5 @@
 from typing import Optional, Tuple, Type
 
-from django.db.models import QuerySet
-from django.http import HttpRequest, HttpResponse
-from django_filters.rest_framework import DjangoFilterBackend
-from djoser.serializers import SetPasswordSerializer
-from djoser.views import UserViewSet
-from rest_framework import filters, status, viewsets
-from rest_framework.decorators import action
-from rest_framework.filters import OrderingFilter, SearchFilter
-from rest_framework.pagination import PageNumberPagination
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.request import Request
-from rest_framework.response import Response
-
 from api.filters import IngredientFilter, RecipeFilter
 from api.pagination import CustomPagination
 from api.permissions import IsAdminOrReadOnly, StaffAuthorOrReadOnly
@@ -21,7 +8,19 @@ from api.serializers import (CustomRecipeSerializer,
                              IngredientReadSerializer, RecipeCreateSerializer,
                              RecipeReadSerializer, SubscribeSerializer,
                              TagSerializer)
+from django.db.models import QuerySet
+from django.http import HttpRequest, HttpResponse
+from django_filters.rest_framework import DjangoFilterBackend
+from djoser.serializers import SetPasswordSerializer
+from djoser.views import UserViewSet
 from recipes.models import Ingredient, Recipe, Subscribe, Tag
+from rest_framework import filters, status, viewsets
+from rest_framework.decorators import action
+from rest_framework.filters import OrderingFilter, SearchFilter
+from rest_framework.pagination import PageNumberPagination
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.request import Request
+from rest_framework.response import Response
 
 from . import constants
 from .actions import (download_shopping_cart, favorite, shopping_cart,

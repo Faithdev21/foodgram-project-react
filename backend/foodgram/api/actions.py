@@ -3,6 +3,7 @@ from io import BytesIO
 from typing import Dict, List, Optional
 
 from django.http import HttpRequest, HttpResponse
+from recipes.models import Ingredient, RecipeIngredient, Subscribe
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_CENTER, TA_LEFT
 from reportlab.lib.pagesizes import letter
@@ -14,8 +15,6 @@ from reportlab.platypus import (Paragraph, SimpleDocTemplate, Spacer, Table,
 from rest_framework import status
 from rest_framework.request import Request
 from rest_framework.response import Response
-
-from recipes.models import Ingredient, RecipeIngredient, Subscribe
 from users.models import User
 
 from .serializers import SubscribeSerializer

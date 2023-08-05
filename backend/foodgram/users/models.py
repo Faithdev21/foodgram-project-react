@@ -1,7 +1,6 @@
+from api import constants
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-
-from api import constants
 from users.validators import (validate_email_length,
                               validate_name_and_lastname, validate_password,
                               validate_username, validate_username_length)

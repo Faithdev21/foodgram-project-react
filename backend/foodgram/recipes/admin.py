@@ -1,7 +1,6 @@
 from typing import Tuple
 
 from django.contrib import admin
-
 from recipes.models import Ingredient, Recipe, RecipeIngredient, Subscribe, Tag
 from users.models import User
 

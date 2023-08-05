@@ -4,10 +4,9 @@ from typing import Dict, Optional, Tuple
 
 from django.core.files.base import ContentFile
 from djoser.serializers import UserCreateSerializer, UserSerializer
+from recipes.models import Ingredient, Recipe, RecipeIngredient, Subscribe, Tag
 from rest_framework import serializers
 from rest_framework.utils.serializer_helpers import ReturnDict
-
-from recipes.models import Ingredient, Recipe, RecipeIngredient, Subscribe, Tag
 from users.models import User
 
 

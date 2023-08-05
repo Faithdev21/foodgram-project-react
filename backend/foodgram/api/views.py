@@ -5,7 +5,6 @@ from django.http import HttpRequest, HttpResponse
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser.serializers import SetPasswordSerializer
 from djoser.views import UserViewSet
-from recipes.models import Ingredient, Recipe, Subscribe, Tag
 from rest_framework import filters, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.filters import OrderingFilter, SearchFilter
@@ -22,6 +21,7 @@ from api.serializers import (CustomRecipeSerializer,
                              IngredientReadSerializer, RecipeCreateSerializer,
                              RecipeReadSerializer, SubscribeSerializer,
                              TagSerializer)
+from recipes.models import Ingredient, Recipe, Subscribe, Tag
 
 from . import constants
 from .actions import (download_shopping_cart, favorite, shopping_cart,

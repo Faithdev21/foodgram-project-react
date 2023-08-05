@@ -1,9 +1,10 @@
 import getpass
 import re
 
-from api import constants
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
+
+from api import constants
 
 
 def validate_username(value: str) -> str:
@@ -43,7 +44,13 @@ def validate_name_and_lastname(value: str) -> None:
 
 def validate_password(value: str) -> None:
     """Валидация пароля."""
-    pattern_password = r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!#%*?&]{8,150}$'
+    pattern_password = (
+        r'^(?=.*[a-z])'
+        r'(?=.*[A-Z])'
+        r'(?=.*\d)'
+        r'(?=.*[@$!%*#?&])'
+        r'[A-Za-z\d@$!#%*?&]{8,150}$'
+    )
     user_input = getpass.getpass()
     if not re.search(pattern_password, user_input):
         raise ValidationError(

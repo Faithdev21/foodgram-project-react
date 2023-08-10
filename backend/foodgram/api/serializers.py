@@ -8,8 +8,8 @@ from rest_framework import serializers
 from rest_framework.fields import IntegerField
 from rest_framework.utils.serializer_helpers import ReturnDict
 
-from recipes.models import Ingredient, Recipe, RecipeIngredient, Subscribe, Tag
 from api import constants
+from recipes.models import Ingredient, Recipe, RecipeIngredient, Subscribe, Tag
 from users.models import User
 
 

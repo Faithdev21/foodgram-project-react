@@ -15,9 +15,9 @@ from rest_framework import status
 from rest_framework.request import Request
 from rest_framework.response import Response
 
-from recipes.models import Ingredient, RecipeIngredient, Subscribe
 from api import constants
 from api.serializers import SubscribeCreateSerializer, SubscribeSerializer
+from recipes.models import Ingredient, RecipeIngredient, Subscribe
 
 
 def favorite(self, request: Request, pk: Optional[int] = None) -> Response:

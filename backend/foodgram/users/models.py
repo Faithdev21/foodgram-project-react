@@ -42,6 +42,7 @@ class User(AbstractUser):
         validators=[validate_password]
     )
     is_subscribed = models.BooleanField(
+        verbose_name='В подписках',
         default=False,
         db_index=True,
     )

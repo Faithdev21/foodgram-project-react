@@ -13,7 +13,6 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
 
-from recipes.models import Ingredient, Recipe, Subscribe, Tag
 from api import constants
 from api.actions import (download_shopping_cart, favorite, shopping_cart,
                          subscribe, subscriptions)
@@ -26,6 +25,7 @@ from api.serializers import (CustomRecipeSerializer,
                              IngredientReadSerializer, RecipeCreateSerializer,
                              RecipeReadSerializer, SubscribeSerializer,
                              TagSerializer)
+from recipes.models import Ingredient, Recipe, Subscribe, Tag
 
 
 class CustomUserViewSet(UserViewSet):

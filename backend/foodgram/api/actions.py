@@ -3,7 +3,6 @@ from io import BytesIO
 from typing import Dict, List, Optional
 
 from django.http import HttpRequest, HttpResponse
-from recipes.models import Ingredient, RecipeIngredient, Subscribe
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_CENTER, TA_LEFT
 from reportlab.lib.pagesizes import letter
@@ -15,9 +14,10 @@ from reportlab.platypus import (Paragraph, SimpleDocTemplate, Spacer, Table,
 from rest_framework import status
 from rest_framework.request import Request
 from rest_framework.response import Response
-from users.models import User
 
-from .serializers import SubscribeSerializer
+from recipes.models import Ingredient, RecipeIngredient, Subscribe
+from api import constants
+from api.serializers import SubscribeCreateSerializer, SubscribeSerializer
 
 
 def favorite(self, request: Request, pk: Optional[int] = None) -> Response:
@@ -59,8 +59,10 @@ def download_shopping_cart(self, request: HttpRequest) -> HttpResponse:
 
     styles = getSampleStyleSheet()
     styles.add(ParagraphStyle(
-        name='RussianStyle', fontName='Arial', fontSize=12,
-        alignment=TA_LEFT, spaceAfter=6, spaceBefore=6))
+        name='RussianStyle', fontName='Arial',
+        fontSize=constants.FONTSIZE_12, alignment=TA_LEFT,
+        spaceAfter=constants.SPACE, spaceBefore=constants.SPACE)
+    )
 
     ingredient_totals: Dict[str, int] = defaultdict(int)
     for recipe in recipes_in_shopping_cart:
@@ -87,7 +89,7 @@ def download_shopping_cart(self, request: HttpRequest) -> HttpResponse:
         data.append(
             [Paragraph("СПИСОК ПОКУПОК ПУСТ.", styles['RussianStyle'])]
         )
-    row_height = 30
+    row_height = constants.ROW_HEIGHT
     num_rows = len(data)
     rowHeights = [row_height] * num_rows
 
@@ -96,8 +98,8 @@ def download_shopping_cart(self, request: HttpRequest) -> HttpResponse:
         ('VALIGN', (0, 0), (-1, 0), 'MIDDLE'),
         ('ALIGN', (0, 0), (-1, 0), 'LEFT'),
         ('FONTNAME', (0, 0), (-1, 0), 'Arial'),
-        ('TOPPADDING', (0, 0), (-1, 0), 6),
-        ('LINEABOVE', (0, 0), (-1, 0), 2, colors.green),
+        ('TOPPADDING', (0, 0), (-1, 0), constants.TOPPADDING),
+        ('LINEABOVE', (0, 0), (-1, 0), constants.LINEABOVE, colors.green),
     ])
     table.setStyle(style)
     doc = SimpleDocTemplate(buffer, pagesize=letter, bottomMargin=30)
@@ -105,22 +107,22 @@ def download_shopping_cart(self, request: HttpRequest) -> HttpResponse:
     header_style = ParagraphStyle(
         name='HeaderStyle', fontName='Arial-Bold', fontSize=16,
         alignment=TA_CENTER, textColor=colors.black,
-        spaceAfter=6, spaceBefore=6
+        spaceAfter=constants.SPACE, spaceBefore=constants.SPACE
     )
     header_text = "СПИСОК ПОКУПОК"
     header_paragraph = Paragraph(header_text, header_style)
     story.append(header_paragraph)
-    story.append(Spacer(1, 20))
+    story.append(Spacer(constants.SPACER_1, constants.SPACER_20))
     story.append(table)
     footer_style = ParagraphStyle(
         name='FooterStyle', fontName='Arial', fontSize=14,
         alignment=TA_CENTER, textColor=colors.black, )
     footer_text = "<i>Приятного аппетита!</i>"
     footer_paragraph = Paragraph(footer_text, footer_style)
-    story.append(Spacer(1, 20))
+    story.append(Spacer(constants.SPACER_1, constants.SPACER_20))
     story.append(footer_paragraph)
     doc.build(story)
-    buffer.seek(0)
+    buffer.seek(constants.SEEK)
     response = HttpResponse(buffer.getvalue(), content_type='application/pdf')
     response['Content-Disposition'] = 'attachment;filename="shopping_list.pdf"'
     return response
@@ -139,39 +141,24 @@ def subscriptions(self, request: Request) -> Response:
 
 def subscribe(self, request: Request, pk: Optional[int] = None) -> Response:
     """Добавление и удаление подписки на пользователя."""
-    following_user = User.objects.get(pk=pk)
+    data = {
+        'user': request.user.pk,
+        'following': pk
+    }
+
     if request.method == 'POST':
-        if request.user == following_user:
-            return Response(
-                {'detail': 'Нельзя подписаться на себя'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        if Subscribe.objects.filter(
-                user=request.user,
-                following=following_user
-        ).exists():
-            return Response(
-                {'detail': 'Вы уже подписаны на этого пользователя'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        subscribe, created = Subscribe.objects.get_or_create(
-            user=request.user,
-            following=following_user
+        serializer = SubscribeCreateSerializer(
+            data=data,
         )
-        subscribe.is_subscribe = True
-        subscribe.save()
-        serializer = SubscribeSerializer(
-            subscribe,
-            context={'request': request}
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    try:
+        subscriptions = self.get_queryset().get(following=pk)
+    except Subscribe.DoesNotExist:
+        return Response(
+            {'detail': 'Подписка не найдена.'},
+            status=status.HTTP_404_NOT_FOUND
         )
-        return Response(serializer.data)
-    else:
-        try:
-            subscriptions = self.get_queryset().get(following=pk)
-        except Subscribe.DoesNotExist:
-            return Response(
-                {'detail': 'Подписка не найдена.'},
-                status=status.HTTP_404_NOT_FOUND
-            )
-        subscriptions.delete()
+    subscriptions.delete()
     return Response(status=status.HTTP_204_NO_CONTENT)

@@ -4,9 +4,12 @@ from typing import Dict, Optional, Tuple
 
 from django.core.files.base import ContentFile
 from djoser.serializers import UserCreateSerializer, UserSerializer
-from recipes.models import Ingredient, Recipe, RecipeIngredient, Subscribe, Tag
 from rest_framework import serializers
+from rest_framework.fields import IntegerField
 from rest_framework.utils.serializer_helpers import ReturnDict
+
+from recipes.models import Ingredient, Recipe, RecipeIngredient, Subscribe, Tag
+from api import constants
 from users.models import User
 
 
@@ -41,8 +44,8 @@ class CustomUserSerializer(UserSerializer):
         representation = super().to_representation(instance)
         request = self.context.get('request')
         if request and request.user.is_authenticated:
-            is_subscribed = Subscribe.objects.filter(
-                user=request.user, following=instance
+            is_subscribed = request.user.follower.filter(
+                following=instance
             ).exists()
             representation['is_subscribed'] = is_subscribed
         return representation
@@ -50,6 +53,7 @@ class CustomUserSerializer(UserSerializer):
 
 class CustomUserCreateSerializer(UserCreateSerializer):
     """Сериализатор для создания модели User'а."""
+
     class Meta:
         model = User
         fields: Tuple[str, ...] = (
@@ -64,6 +68,7 @@ class CustomUserCreateSerializer(UserCreateSerializer):
 
 class TagSerializer(serializers.ModelSerializer):
     """Сериализатор для тегов."""
+
     class Meta:
         model = Tag
         fields: Tuple[str, ...] = ('id', 'name', 'color', 'slug')
@@ -72,6 +77,7 @@ class TagSerializer(serializers.ModelSerializer):
 
 class IngredientReadSerializer(serializers.ModelSerializer):
     """Сериализатор для просмотра ингредиентов."""
+
     class Meta:
         model = Ingredient
         fields: Tuple[str, ...] = ('id', 'name', 'measurement_unit')
@@ -113,6 +119,9 @@ class CustomIngredientCreateSerializer(serializers.ModelSerializer):
         source='ingredient',
         queryset=Ingredient.objects.all()
     )
+    amount = IntegerField(
+        max_value=constants.NUMBER_MAX, min_value=constants.NUMBER_MIN
+    )
 
     class Meta:
         model = RecipeIngredient
@@ -123,6 +132,9 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
     """Сериализатор для создания рецептов."""
     ingredients = CustomIngredientCreateSerializer(many=True)
     image = Base64ImageField(required=True)
+    cooking_time = IntegerField(
+        max_value=constants.NUMBER_MAX, min_value=constants.NUMBER_MIN
+    )
 
     class Meta:
         model = Recipe
@@ -161,7 +173,7 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
             )
             for ingredient_data in ingredients
         ]
-        RecipeIngredient.objects.bulk_create(recipe_ingredients)
+        instance.recipe_ingredients.bulk_create(recipe_ingredients)
         return instance
 
     def update(self, instance: object, validated_data: Dict) -> object:
@@ -172,10 +184,9 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         for ingredient_data in ingredients_data:
             ingredient = ingredient_data.get('ingredient')
             amount = ingredient_data.get('amount')
-
-            RecipeIngredient.objects.filter(recipe=instance).update(
-                ingredient=ingredient,
+            instance.recipe_ingredients.update(
                 amount=amount,
+                ingredient=ingredient
             )
         return instance
 
@@ -187,6 +198,7 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
 
 class CustomRecipeSerializer(serializers.ModelSerializer):
     """Сериализатор для Избранного и Списка покупок."""
+
     class Meta:
         model = Recipe
         fields: Tuple[str, ...] = ('id', 'name', 'image', 'cooking_time')
@@ -230,14 +242,39 @@ class SubscribeSerializer(serializers.ModelSerializer):
 
     def get_is_subscribed(self, obj: Subscribe) -> bool:
         """Возвращает True, если подписка существует."""
-        request = self.context.get('request')
-        if request and request.user.is_authenticated:
-            return Subscribe.objects.filter(
-                user=request.user, following=obj.following
+        if obj.user.is_authenticated:
+            return obj.user.follower.filter(
+                following=obj.following
             ).exists()
-        return False
 
     def get_recipes_count(self, obj: Subscribe) -> Optional[int]:
         """Возвращает количество рецептов у пользователя
         на которого вы подписаны"""
         return obj.following.recipes.count()
+
+
+class SubscribeCreateSerializer(serializers.ModelSerializer):
+    """Сериалайзер для создания и удаления подписок."""
+
+    class Meta:
+        model = Subscribe
+        fields = '__all__'
+
+    def validate(self, data):
+        following_user = data.get('following')
+        user = data.get('user')
+        if user == following_user:
+            raise serializers.ValidationError(
+                'Нельзя подписаться на себя.'
+            )
+        if user.follower.filter(following=following_user).exists():
+            raise serializers.ValidationError(
+                'Вы уже подписаны на этого пользователя.'
+            )
+        return data
+
+    def to_representation(self, instance):
+        request = self.context.get('request')
+        return SubscribeSerializer(
+            instance, context={'request': request}
+        ).data

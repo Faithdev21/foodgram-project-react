@@ -2,6 +2,7 @@ from typing import Tuple
 
 from django_filters import CharFilter, FilterSet
 from django_filters.rest_framework import BooleanFilter
+
 from recipes.models import Ingredient, Recipe
 
 

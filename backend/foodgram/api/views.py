@@ -1,19 +1,10 @@
 from typing import Optional, Tuple, Type
 
-from api.filters import IngredientFilter, RecipeFilter
-from api.pagination import CustomPagination
-from api.permissions import IsAdminOrReadOnly, StaffAuthorOrReadOnly
-from api.serializers import (CustomRecipeSerializer,
-                             CustomUserCreateSerializer, CustomUserSerializer,
-                             IngredientReadSerializer, RecipeCreateSerializer,
-                             RecipeReadSerializer, SubscribeSerializer,
-                             TagSerializer)
 from django.db.models import QuerySet
 from django.http import HttpRequest, HttpResponse
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser.serializers import SetPasswordSerializer
 from djoser.views import UserViewSet
-from recipes.models import Ingredient, Recipe, Subscribe, Tag
 from rest_framework import filters, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.filters import OrderingFilter, SearchFilter
@@ -22,10 +13,19 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
 
-from . import constants
-from .actions import (download_shopping_cart, favorite, shopping_cart,
-                      subscribe, subscriptions)
-from .mixins import CreateList, ListRetrieve
+from recipes.models import Ingredient, Recipe, Subscribe, Tag
+from api import constants
+from api.actions import (download_shopping_cart, favorite, shopping_cart,
+                         subscribe, subscriptions)
+from api.filters import IngredientFilter, RecipeFilter
+from api.mixins import CreateList, ListRetrieve
+from api.pagination import CustomPagination
+from api.permissions import IsAdminOrReadOnly, StaffAuthorOrReadOnly
+from api.serializers import (CustomRecipeSerializer,
+                             CustomUserCreateSerializer, CustomUserSerializer,
+                             IngredientReadSerializer, RecipeCreateSerializer,
+                             RecipeReadSerializer, SubscribeSerializer,
+                             TagSerializer)
 
 
 class CustomUserViewSet(UserViewSet):
@@ -38,7 +38,7 @@ class CustomUserViewSet(UserViewSet):
         """Возвращает сериализатор."""
         if self.action == "set_password":
             return SetPasswordSerializer
-        elif self.request.method == "POST":
+        if self.request.method == "POST":
             return CustomUserCreateSerializer
         return self.serializer_class
 
@@ -119,21 +119,18 @@ class RecipeViewSet(viewsets.ModelViewSet):
                 return Response(
                     serializer.data, status=status.HTTP_201_CREATED
                 )
-            else:
-                return Response(
-                    {'detail': error_message},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-        else:
-            if getattr(recipe, field_name):
-                setattr(recipe, field_name, False)
-                recipe.save()
-                return Response(status=status.HTTP_204_NO_CONTENT)
-            else:
-                return Response(
-                    {'detail': error_message},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
+            return Response(
+                {'detail': error_message},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        if getattr(recipe, field_name):
+            setattr(recipe, field_name, False)
+            recipe.save()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response(
+            {'detail': error_message},
+            status=status.HTTP_400_BAD_REQUEST
+        )
 
     @action(
         detail=True,
@@ -164,7 +161,7 @@ class SubscribeViewSet(CreateList):
     """Возвращает все подписки пользователя."""
     queryset = Subscribe.objects.all()
     serializer_class = SubscribeSerializer
-    permission_classes = (IsAuthenticated, )
+    permission_classes = (IsAuthenticated,)
     filter_backends = (filters.SearchFilter,)
     search_fields = ('following__username',)
 

@@ -10,7 +10,7 @@ class RecipeFilter(FilterSet):
     """Фильтрация по избранному, автору и списку покупок."""
     is_favorited = BooleanFilter(field_name="is_favorited")
     is_in_shopping_cart = BooleanFilter(field_name="is_in_shopping_cart")
-    author = CharFilter(field_name='author__username')
+    author = CharFilter(field_name='author__id')
 
     class Meta:
         model = Recipe

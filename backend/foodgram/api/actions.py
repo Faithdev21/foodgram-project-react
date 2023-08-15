@@ -54,12 +54,12 @@ def download_shopping_cart(self, request: HttpRequest) -> HttpResponse:
     )
 
     buffer = BytesIO()
-    pdfmetrics.registerFont(TTFont('Arial', 'arial.ttf'))
-    pdfmetrics.registerFont(TTFont('Arial-Bold', 'arialbd.ttf'))
+    pdfmetrics.registerFont(TTFont('DejaVuSans', 'DejaVuSans.ttf'))
+    pdfmetrics.registerFont(TTFont('DejaVuSans-Bold', 'DejaVuSans-Bold.ttf'))
 
     styles = getSampleStyleSheet()
     styles.add(ParagraphStyle(
-        name='RussianStyle', fontName='Arial',
+        name='RussianStyle', fontName='DejaVuSans',
         fontSize=constants.FONTSIZE_12, alignment=TA_LEFT,
         spaceAfter=constants.SPACE, spaceBefore=constants.SPACE)
     )
@@ -97,7 +97,7 @@ def download_shopping_cart(self, request: HttpRequest) -> HttpResponse:
     style = TableStyle([
         ('VALIGN', (0, 0), (-1, 0), 'MIDDLE'),
         ('ALIGN', (0, 0), (-1, 0), 'LEFT'),
-        ('FONTNAME', (0, 0), (-1, 0), 'Arial'),
+        ('FONTNAME', (0, 0), (-1, 0), 'DejaVuSans'),
         ('TOPPADDING', (0, 0), (-1, 0), constants.TOPPADDING),
         ('LINEABOVE', (0, 0), (-1, 0), constants.LINEABOVE, colors.green),
     ])
@@ -105,7 +105,7 @@ def download_shopping_cart(self, request: HttpRequest) -> HttpResponse:
     doc = SimpleDocTemplate(buffer, pagesize=letter, bottomMargin=30)
     story: List[Paragraph | Spacer | Table] = []
     header_style = ParagraphStyle(
-        name='HeaderStyle', fontName='Arial-Bold', fontSize=16,
+        name='HeaderStyle', fontName='DejaVuSans-Bold', fontSize=16,
         alignment=TA_CENTER, textColor=colors.black,
         spaceAfter=constants.SPACE, spaceBefore=constants.SPACE
     )
@@ -115,7 +115,7 @@ def download_shopping_cart(self, request: HttpRequest) -> HttpResponse:
     story.append(Spacer(constants.SPACER_1, constants.SPACER_20))
     story.append(table)
     footer_style = ParagraphStyle(
-        name='FooterStyle', fontName='Arial', fontSize=14,
+        name='FooterStyle', fontName='DejaVuSans', fontSize=14,
         alignment=TA_CENTER, textColor=colors.black, )
     footer_text = "<i>Приятного аппетита!</i>"
     footer_paragraph = Paragraph(footer_text, footer_style)

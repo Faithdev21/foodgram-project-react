@@ -184,9 +184,11 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         for ingredient_data in ingredients_data:
             ingredient = ingredient_data.get('ingredient')
             amount = ingredient_data.get('amount')
-            recipe_ingredient = instance.recipe_ingredients.get(ingredient=ingredient)
+            recipe_ingredient = instance.recipe_ingredients.get(
+                ingredient=ingredient
+            )
             recipe_ingredient.amount = amount
-            recipe_ingredients.save()
+            recipe_ingredient.save()
         return instance
 
     def to_representation(self, instance: object) -> object:

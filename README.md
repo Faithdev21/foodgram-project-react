@@ -61,7 +61,7 @@ DELETE - Удаление рецепта.
 DELETE - Удаление рецепта из списка покупок.
 POST - Добавление рецепта в список покупок.
 
-`/api/recipes/download_shopping_cart/`
+`/api/recipes/download_shopping_cart/`  
 GET - Cкачать список покупок (PDF)
 
 `/api/recipes/{id}/favorite/`

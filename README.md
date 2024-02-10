@@ -6,18 +6,40 @@
 
 УСТАНОВКА ПРИЛОЖЕНИЯ:
 
-1. Клонировать репозиторий и перейти в него в командной строке:
+Клонировать репозиторий и перейти в него в командной строке:
    git clone git@github.com:Faithdev21/foodgram-project-react
-2. Cоздать и активировать виртуальное окружение:
-   python3 -m venv venv
-   source venv/bin/activate
-3. Установить зависимости из файла requirements.txt:
-   python3 -m pip install --upgrade pip
-   pip install -r requirements.txt
-4. Выполнить миграции:
-   python3 manage.py migrate
-5. Запустить проект:
-   python3 manage.py runserver
+   
+Создайте файл /infra/.env
+```
+SECRET_KEY=django-insecure-r7=j=j2^+d-vx(rm%0wpa7b!r5t#wb#yeffoq2#co*^2(pg2oy
+DEBUG=True
+ALLOWED_HOSTS=127.0.0.1,localhost,backend
+DB_ENGINE=django.db.backends.postgresql
+POSTGRES_DB=postgres
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=postgres
+DB_HOST=db
+DB_PORT=5432
+```
+Из директории с docker-compose.yaml выполните:
+
+```docker-compose up -d```
+
+Для пересборки образа (в случае обновления содержимого проекта) дополните команду так:
+
+```docker-compose up -d --build```
+
+Примените миграции:
+
+```docker-compose exec backend python manage.py migrate```
+
+Создайте суперюзера:
+
+```docker-compose exec backend python manage.py createsuperuser```
+
+Соберите статику:
+
+```docker-compose exec backend python manage.py collectstatic --no-input```
 
 ---
 
@@ -26,7 +48,9 @@
 Тестовые данные ингредиентов
 загружаются файлами в формате csv командой:
 
-- `python manage.py import_csv`
+```docker-compose exec backend python manage.py import_csv```
+
+**P.S. Добавьте хотя бы 1 тег через админку, чтобы корректно создавать рецепты**
 
 ---
 

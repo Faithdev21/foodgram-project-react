@@ -1,6 +1,9 @@
 # Foodgram project
 
 ### Foodram - это продуктовый помощник, сайт, на котором пользователи будут публиковать рецепты, добавлять чужие рецепты в избранное и подписываться на публикации других авторов. Сервис «Список покупок» позволит пользователям создавать список продуктов, которые нужно купить для приготовления выбранных блюд.
+![Image (2)](https://github.com/Faithdev21/foodgram-project-react/assets/119350657/dcaa1767-b558-4f15-956a-70eacc893bd8)
+![Image (3)](https://github.com/Faithdev21/foodgram-project-react/assets/119350657/a425dfbc-784a-4abe-87c8-3cce33b5d661)
+![Image (4)](https://github.com/Faithdev21/foodgram-project-react/assets/119350657/0705b27c-9526-4e80-a290-d02793412ed1)
 
 ---
 
